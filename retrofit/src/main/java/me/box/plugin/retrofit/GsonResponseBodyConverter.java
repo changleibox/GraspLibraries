@@ -45,10 +45,13 @@ final class GsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
                 throw new HttpException(message, code);
             }
         } catch (Exception e) {
-            if (!(e instanceof IOException)) {
-                e = new IOException(e.getMessage());
+            IOException exception;
+            if (e instanceof IOException) {
+                exception = (IOException) e;
+            } else {
+                exception = new IOException(e.getMessage());
             }
-            throw new IOException(e.getMessage());
+            throw exception;
         }
         if (TypeCompat.isVoid(type)) {
             return null;
