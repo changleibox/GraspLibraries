@@ -15,8 +15,7 @@ import rx.Subscription;
  * <p>
  * 基本的网络请求监听者
  */
-
-public class ISubscriber<T> extends Subscriber<T> {
+public class SubscriberWrapper<T> extends Subscriber<T> {
     @Nullable
     private final Observer<T> mObserver;
     private final boolean isShowPrompt;
@@ -24,23 +23,23 @@ public class ISubscriber<T> extends Subscriber<T> {
     @Nullable
     private static OnObserverErrorListener sObserverErrorListener;
 
-    public ISubscriber(@Nullable Observer<T> observer) {
+    public SubscriberWrapper(@Nullable Observer<T> observer) {
         this(observer, true);
     }
 
-    public ISubscriber(@Nullable Observer<T> observer, boolean isShowPrompt) {
+    public SubscriberWrapper(@Nullable Observer<T> observer, boolean isShowPrompt) {
         this.mObserver = observer;
         this.isShowPrompt = isShowPrompt;
         if (observer instanceof Subscriber) {
             ((Subscriber<T>) observer).add(new Subscription() {
                 @Override
                 public void unsubscribe() {
-                    ISubscriber.this.unsubscribe();
+                    SubscriberWrapper.this.unsubscribe();
                 }
 
                 @Override
                 public boolean isUnsubscribed() {
-                    return ISubscriber.this.isUnsubscribed();
+                    return SubscriberWrapper.this.isUnsubscribed();
                 }
             });
         }
@@ -79,12 +78,12 @@ public class ISubscriber<T> extends Subscriber<T> {
     }
 
     public static void setObserverErrorListener(OnObserverErrorListener listener) {
-        ISubscriber.sObserverErrorListener = listener;
+        SubscriberWrapper.sObserverErrorListener = listener;
     }
 
     private static void showErrorMsg(Throwable e) {
         if (sObserverErrorListener != null) {
-            sObserverErrorListener.onShowErrorMsg(e);
+            sObserverErrorListener.onError(e);
         }
     }
 }

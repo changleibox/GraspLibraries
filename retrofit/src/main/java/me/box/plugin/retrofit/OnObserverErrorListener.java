@@ -10,6 +10,5 @@ package me.box.plugin.retrofit;
  * 显示网络请求错误信息
  */
 public interface OnObserverErrorListener {
-
-    void onShowErrorMsg(Throwable throwable);
+    void onError(Throwable throwable);
 }
