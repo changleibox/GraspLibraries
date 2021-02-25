@@ -11,8 +11,8 @@ import androidx.annotation.Nullable;
 
 import me.box.plugin.retrofit.Callback;
 import me.box.plugin.retrofit.HttpRequest;
-import me.box.plugin.retrofit.impl.RetrofitContext;
 import me.box.plugin.retrofit.SubscriberWrapper;
+import me.box.plugin.retrofit.impl.RetrofitContext;
 import okhttp3.Interceptor;
 import rx.Observable;
 import rx.Observer;
@@ -25,7 +25,7 @@ import rx.functions.Action1;
  * 网络请求配置
  */
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
-public abstract class HttpRequestWrapper<E> {
+public class HttpRequestWrapper<E> {
     private final HttpRequest mRequest;
     private final E mService;
 
