@@ -34,7 +34,7 @@ import rx.subscriptions.CompositeSubscription;
  * Fragment基类
  */
 abstract public class BaseAppCompatDialogFragment extends AppCompatDialogFragment implements ContextWrapper, LifecycleProvider<FragmentEvent>, FragmentLifecycle {
-    private final ContextDelegate.PreferenceFragmentDelegate mDelegate = ContextDelegate.create(this);
+    private final ContextDelegate.FragmentDelegate mDelegate = ContextDelegate.create(this);
 
     @Nonnull
     @Override
