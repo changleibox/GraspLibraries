@@ -15,10 +15,15 @@ import static android.content.Context.TELEPHONY_SERVICE;
  * <p>
  * 工具类
  */
-public class Utils {
-    private Utils() {
+public class Platform {
+    private Platform() {
     }
 
+    /**
+     * 获取imei
+     *
+     * @return 设备imei
+     */
     public static String getImei() {
         final Application context = BaseApplication.getInstance();
         String imei;

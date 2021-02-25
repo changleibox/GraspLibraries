@@ -20,7 +20,7 @@ import java.util.Random;
 
 import me.box.plugin.baselibrary.BaseApplication;
 import me.box.plugin.baselibrary.util.Encrypt;
-import me.box.plugin.baselibrary.util.Utils;
+import me.box.plugin.baselibrary.util.Platform;
 import me.box.plugin.retrofit.JsonCompat;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -73,7 +73,7 @@ public class GenericInterceptor implements Interceptor {
         genericParams.put("appkey", APP_KEY);
         genericParams.put("code", getRandomString());
         genericParams.put("timestamp", System.currentTimeMillis() / 1000);
-        genericParams.put("esn", Utils.getImei());
+        genericParams.put("esn", Platform.getImei());
         genericParams.put("clientver", getVersionName());
         if (mGenericParams != null) {
             genericParams.putAll(mGenericParams);
