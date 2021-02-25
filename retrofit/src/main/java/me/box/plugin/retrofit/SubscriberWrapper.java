@@ -6,6 +6,7 @@ package me.box.plugin.retrofit;
 
 import androidx.annotation.Nullable;
 
+import me.box.plugin.retrofit.impl.OnObserverErrorListener;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;

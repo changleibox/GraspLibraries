@@ -2,7 +2,7 @@
  * Copyright (c) 2021 CHANGLEI. All rights reserved.
  */
 
-package me.box.plugin.retrofit;
+package me.box.plugin.retrofit.impl;
 
 import android.content.DialogInterface;
 

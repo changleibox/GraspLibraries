@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
+import me.box.plugin.retrofit.impl.LifecycleImpl;
+import me.box.plugin.retrofit.impl.RetrofitContext;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

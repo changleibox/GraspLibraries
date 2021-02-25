@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import me.box.plugin.retrofit.impl.RetrofitProgressImpl;
+import me.box.plugin.retrofit.impl.ShowLoadImpl;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
