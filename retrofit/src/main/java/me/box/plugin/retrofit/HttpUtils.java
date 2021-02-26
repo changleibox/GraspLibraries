@@ -28,7 +28,6 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
-import okio.Timeout;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
@@ -182,7 +181,6 @@ public class HttpUtils {
 
             public void writeTo(@NotNull BufferedSink sink) throws IOException {
                 Intrinsics.checkParameterIsNotNull(sink, "sink");
-                final Timeout timeout = new Timeout();
                 final Source schemaSource = Okio.source(new ByteArrayInputStream(data));
                 Throwable throwable = null;
 
