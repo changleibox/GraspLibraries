@@ -47,6 +47,9 @@ public class ProgressRequestBody extends RequestBody {
 
     @Override
     public void writeTo(@NotNull BufferedSink sink) throws IOException {
+        if (sink instanceof Buffer) {
+            return;
+        }
         if (bufferedSink == null) {
             bufferedSink = Okio.buffer(wrapProgressSink(sink));
         }
@@ -77,7 +80,7 @@ public class ProgressRequestBody extends RequestBody {
             totalBytesWrite += byteCount != -1 ? byteCount : 0;
 
             if (null != progressListener) {
-                HandlerCompat.runOnUiThread(() -> progressListener.update(totalBytesWrite, contentLength, byteCount == -1));
+                HandlerCompat.runOnUiThread(() -> progressListener.update(totalBytesWrite, contentLength, contentLength == totalBytesWrite));
             }
         }
     }

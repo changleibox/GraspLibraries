@@ -39,8 +39,10 @@ public class GenericInterceptor implements Interceptor {
     private static final String SECRET = "8C05HhgXB6xGo4qPNpkfdUEQtyTeJsRVizcZ1YwMILAuWvFm3l";
     private static final String APP_KEY = "EKCoHoXRyPGflavj51";
 
+    @Nullable
     public static String sToken = null;
 
+    @Nullable
     private final Map<String, Object> mGenericParams;
 
     public GenericInterceptor(@Nullable Map<String, Object> genericParams) {

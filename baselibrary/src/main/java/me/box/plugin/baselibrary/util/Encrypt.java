@@ -90,11 +90,20 @@ public class Encrypt {
             //JDK1.8及以上可直接使用Base64，JDK1.7及以下可以使用BASE64Encoder
             //Android平台可以使用android.util.Base64
             return Base64.encodeToString(bytes, Base64.DEFAULT);
-
         } catch (Exception e) {
             e.printStackTrace();
             return data;
         }
+    }
+
+    /**
+     * DES解密字符串
+     *
+     * @param data 待解密字符串
+     * @return 解密后内容
+     */
+    public static String decrypt(String data) {
+        return decrypt(PASSWORD, data);
     }
 
     /**
