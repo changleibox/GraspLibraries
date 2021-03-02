@@ -43,11 +43,19 @@ public class Observables {
     }
 
     public static <T> Subscription subscribe(@NonNull Callable<T> callable, @Nullable Observer<T> observer) {
-        return subscribe(null, create(callable), observer, MAIN_THREAD);
+        return subscribe(null, callable, observer);
     }
 
     public static <T> Subscription subscribe(@NonNull Callable<T> callable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
-        return subscribe(null, create(callable), observer, observeOn);
+        return subscribe(null, callable, observer, observeOn);
+    }
+
+    public static <T> Subscription subscribe(@Nullable RetrofitContext context, @NonNull Callable<T> callable, @Nullable Observer<T> observer) {
+        return subscribe(context, create(callable), observer);
+    }
+
+    public static <T> Subscription subscribe(@Nullable RetrofitContext context, @NonNull Callable<T> callable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
+        return subscribe(context, create(callable), observer, observeOn);
     }
 
     public static <T> Subscription subscribe(@NonNull Observable<T> observable, @Nullable Observer<T> observer) {
