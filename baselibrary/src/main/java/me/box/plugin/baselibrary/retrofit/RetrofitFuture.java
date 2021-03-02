@@ -16,7 +16,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import me.box.plugin.retrofit.HttpRequest;
 import me.box.plugin.retrofit.impl.RetrofitContext;
 import rx.Observable;
 import rx.Observer;
@@ -24,7 +23,7 @@ import rx.schedulers.Schedulers;
 
 public class RetrofitFuture<T> implements Callable<T>, Observer<T> {
     @NonNull
-    private final HttpRequest mRequest;
+    private final HttpRequestWrapper<?> mWrapper;
     @Nullable
     private final RetrofitContext context;
     @NonNull
@@ -39,9 +38,9 @@ public class RetrofitFuture<T> implements Callable<T>, Observer<T> {
     @Nullable
     private Throwable exception;
 
-    public RetrofitFuture(@Nullable RetrofitContext context, @NonNull HttpRequest request, @NotNull Observable<T> observable) {
+    public RetrofitFuture(@Nullable RetrofitContext context, @NonNull HttpRequestWrapper<?> wrapper, @NotNull Observable<T> observable) {
         this.context = context;
-        this.mRequest = request;
+        this.mWrapper = wrapper;
         this.observable = observable;
         this.mTask = new FutureTask<>(this);
         this.mLatch = new CountDownLatch(1);
@@ -65,7 +64,7 @@ public class RetrofitFuture<T> implements Callable<T>, Observer<T> {
 
     @Override
     public T call() throws Exception {
-        mRequest.request(context, observable, this, Schedulers.io());
+        mWrapper.request(context, observable, this, Schedulers.io());
         mLatch.await();
         if (exception != null) {
             throw new Exception(exception);
