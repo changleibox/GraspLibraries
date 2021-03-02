@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
+import me.box.plugin.retrofit.SubscriberWrapper;
 import me.box.plugin.retrofit.impl.RetrofitContext;
 import me.box.plugin.retrofit.rx.Observables;
 import rx.Observable;
@@ -25,11 +26,17 @@ public class RetrofitFuture<T> implements Action1<Observer<T>> {
     private final Observable<T> mObservable;
     @NonNull
     private final RxFuture<T> mTask;
+    private final boolean isShowPrompt;
 
     public RetrofitFuture(@Nullable RetrofitContext context, @NotNull Observable<T> observable) {
+        this(context, observable, true);
+    }
+
+    public RetrofitFuture(@Nullable RetrofitContext context, @NotNull Observable<T> observable, boolean isShowPrompt) {
         this.mContext = context;
         this.mObservable = observable;
         this.mTask = new RxFuture<>(this);
+        this.isShowPrompt = isShowPrompt;
     }
 
     public T execute() throws Throwable {
@@ -42,6 +49,6 @@ public class RetrofitFuture<T> implements Action1<Observer<T>> {
 
     @Override
     public void call(Observer<T> tObserver) {
-        Observables.subscribe(mContext, mObservable, tObserver, Schedulers.io());
+        Observables.subscribe(mContext, mObservable, new SubscriberWrapper<>(tObserver, isShowPrompt), Schedulers.io());
     }
 }
