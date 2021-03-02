@@ -12,14 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.TimeUnit;
 
 import me.box.plugin.retrofit.impl.RetrofitContext;
+import me.box.plugin.retrofit.rx.Observables;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class RetrofitFuture<T> implements Action1<Observer<T>> {
-    @NonNull
-    private final HttpRequestWrapper<?> mWrapper;
     @Nullable
     private final RetrofitContext mContext;
     @NonNull
@@ -27,9 +26,8 @@ public class RetrofitFuture<T> implements Action1<Observer<T>> {
     @NonNull
     private final RxFuture<T> mTask;
 
-    public RetrofitFuture(@Nullable RetrofitContext context, @NonNull HttpRequestWrapper<?> wrapper, @NotNull Observable<T> observable) {
+    public RetrofitFuture(@Nullable RetrofitContext context, @NotNull Observable<T> observable) {
         this.mContext = context;
-        this.mWrapper = wrapper;
         this.mObservable = observable;
         this.mTask = new RxFuture<>(this);
     }
@@ -44,6 +42,6 @@ public class RetrofitFuture<T> implements Action1<Observer<T>> {
 
     @Override
     public void call(Observer<T> tObserver) {
-        mWrapper.request(mContext, mObservable, tObserver, Schedulers.io());
+        Observables.subscribe(mContext, mObservable, tObserver, Schedulers.io());
     }
 }
