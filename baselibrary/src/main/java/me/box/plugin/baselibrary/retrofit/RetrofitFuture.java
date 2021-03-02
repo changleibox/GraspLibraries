@@ -9,79 +9,41 @@ import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import me.box.plugin.retrofit.impl.RetrofitContext;
 import rx.Observable;
 import rx.Observer;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class RetrofitFuture<T> implements Callable<T>, Observer<T> {
+public class RetrofitFuture<T> implements Action1<Observer<T>> {
     @NonNull
     private final HttpRequestWrapper<?> mWrapper;
     @Nullable
-    private final RetrofitContext context;
+    private final RetrofitContext mContext;
     @NonNull
-    private final Observable<T> observable;
+    private final Observable<T> mObservable;
     @NonNull
-    private final FutureTask<T> mTask;
-    @NonNull
-    private final CountDownLatch mLatch;
-
-    @Nullable
-    private T object;
-    @Nullable
-    private Throwable exception;
+    private final RxFuture<T> mTask;
 
     public RetrofitFuture(@Nullable RetrofitContext context, @NonNull HttpRequestWrapper<?> wrapper, @NotNull Observable<T> observable) {
-        this.context = context;
+        this.mContext = context;
         this.mWrapper = wrapper;
-        this.observable = observable;
-        this.mTask = new FutureTask<>(this);
-        this.mLatch = new CountDownLatch(1);
-    }
-
-    @Override
-    public void onCompleted() {
-    }
-
-    @Override
-    public void onError(Throwable e) {
-        exception = e;
-        mLatch.countDown();
-    }
-
-    @Override
-    public void onNext(T t) {
-        object = t;
-        mLatch.countDown();
-    }
-
-    @Override
-    public T call() throws Exception {
-        mWrapper.request(context, observable, this, Schedulers.io());
-        mLatch.await();
-        return object;
+        this.mObservable = observable;
+        this.mTask = new RxFuture<>(this);
     }
 
     public T execute() throws Throwable {
-        mTask.run();
-        final T result = mTask.get();
-        if (exception != null) {
-            throw exception;
-        }
-        return result;
+        return mTask.execute();
     }
 
     public T execute(long timeout, TimeUnit unit) throws Throwable {
-        mTask.run();
-        final T result = mTask.get(timeout, unit);
-        if (exception != null) {
-            throw exception;
-        }
-        return result;
+        return mTask.execute(timeout, unit);
+    }
+
+    @Override
+    public void call(Observer<T> tObserver) {
+        mWrapper.request(mContext, mObservable, tObserver, Schedulers.io());
     }
 }
