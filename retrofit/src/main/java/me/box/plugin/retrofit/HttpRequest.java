@@ -89,22 +89,22 @@ public class HttpRequest {
         return request(null, observable, subscriber, observeOn);
     }
 
-    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer) {
-        return request(iContext, observable, observer, AndroidSchedulers.mainThread());
+    public <T> Subscriber<T> request(@Nullable RetrofitContext context, @NonNull Observable<T> observable, @Nullable Observer<T> observer) {
+        return request(context, observable, observer, AndroidSchedulers.mainThread());
     }
 
-    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
+    public <T> Subscriber<T> request(@Nullable RetrofitContext context, @NonNull Observable<T> observable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
         Subscriber<T> subscriber;
         if (observer instanceof LoadSubscriber) {
             subscriber = (LoadSubscriber<T>) observer;
-        } else if (iContext != null) {
-            subscriber = new LoadSubscriber<>(iContext, observer);
+        } else if (context != null) {
+            subscriber = new LoadSubscriber<>(context, observer);
         } else if (observer instanceof Subscriber) {
             subscriber = (Subscriber<T>) observer;
         } else {
             subscriber = HttpUtils.convertToSubscriber(observer);
         }
-        return subscribe(iContext, observable, subscriber, observeOn);
+        return subscribe(context, observable, subscriber, observeOn);
     }
 
     public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
@@ -115,30 +115,30 @@ public class HttpRequest {
         return request(null, observable, onNext, observeOn);
     }
 
-    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
-        return request(iContext, observable, onNext, AndroidSchedulers.mainThread());
+    public <T> Subscriber<T> request(@Nullable RetrofitContext context, @NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
+        return request(context, observable, onNext, AndroidSchedulers.mainThread());
     }
 
-    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> onNext, @NonNull Scheduler observeOn) {
+    public <T> Subscriber<T> request(@Nullable RetrofitContext context, @NonNull Observable<T> observable, @Nullable Action1<T> onNext, @NonNull Scheduler observeOn) {
         Subscriber<T> subscriber;
-        if (iContext != null) {
-            subscriber = new LoadSubscriber<>(iContext, onNext);
+        if (context != null) {
+            subscriber = new LoadSubscriber<>(context, onNext);
         } else {
             subscriber = HttpUtils.convertToSubscriber(onNext);
         }
-        return subscribe(iContext, observable, subscriber, observeOn);
+        return subscribe(context, observable, subscriber, observeOn);
     }
 
-    private <T> Subscriber<T> subscribe(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, Subscriber<T> subscriber) {
-        return subscribe(iContext, observable, subscriber, AndroidSchedulers.mainThread());
+    private <T> Subscriber<T> subscribe(@Nullable RetrofitContext context, @NonNull Observable<T> observable, Subscriber<T> subscriber) {
+        return subscribe(context, observable, subscriber, AndroidSchedulers.mainThread());
     }
 
-    private <T> Subscriber<T> subscribe(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, Subscriber<T> subscriber, @NonNull Scheduler observeOn) {
-        if (iContext instanceof LifecycleImpl) {
-            observable = observable.compose(((LifecycleImpl) iContext).bindToLifecycle());
+    private <T> Subscriber<T> subscribe(@Nullable RetrofitContext context, @NonNull Observable<T> observable, Subscriber<T> subscriber, @NonNull Scheduler observeOn) {
+        if (context instanceof LifecycleImpl) {
+            observable = observable.compose(((LifecycleImpl) context).bindToLifecycle());
         }
         CompositeSubscription subscription;
-        if (iContext instanceof LifecycleImpl && (subscription = ((LifecycleImpl) iContext).getCompositeSubscription()) != null) {
+        if (context instanceof LifecycleImpl && (subscription = ((LifecycleImpl) context).getCompositeSubscription()) != null) {
             subscription.add(subscriber);
         }
         observable.subscribeOn(Schedulers.io())
