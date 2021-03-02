@@ -16,6 +16,7 @@ import me.box.plugin.retrofit.impl.RetrofitContext;
 import okhttp3.Interceptor;
 import rx.Observable;
 import rx.Observer;
+import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Action1;
 
@@ -39,16 +40,32 @@ public class HttpRequestWrapper<E> {
         return request(iContext, observable, observer, true);
     }
 
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> observer, @NonNull Scheduler observeOn) {
+        return request(iContext, observable, observer, true, observeOn);
+    }
+
     public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> observer, boolean isShowPrompt) {
         return request(iContext, observable, Callback.inclusion(observer), isShowPrompt);
+    }
+
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> observer, boolean isShowPrompt, @NonNull Scheduler observeOn) {
+        return request(iContext, observable, Callback.inclusion(observer), isShowPrompt, observeOn);
     }
 
     public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer) {
         return request(iContext, observable, observer, true);
     }
 
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
+        return request(iContext, observable, observer, true, observeOn);
+    }
+
     public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer, boolean isShowPrompt) {
         return mRequest.request(iContext, observable, new SubscriberWrapper<>(observer, isShowPrompt));
+    }
+
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer, boolean isShowPrompt, @NonNull Scheduler observeOn) {
+        return mRequest.request(iContext, observable, new SubscriberWrapper<>(observer, isShowPrompt), observeOn);
     }
 
     private static void log(String s) {
