@@ -20,6 +20,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import rx.Observable;
 import rx.Observer;
+import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -80,7 +81,19 @@ public class HttpRequest {
         return mRetrofit.create(cls);
     }
 
+    public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Observer<T> subscriber) {
+        return request(null, observable, subscriber);
+    }
+
+    public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Observer<T> subscriber, @NonNull Scheduler observeOn) {
+        return request(null, observable, subscriber, observeOn);
+    }
+
     public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer) {
+        return request(iContext, observable, observer, AndroidSchedulers.mainThread());
+    }
+
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Observer<T> observer, @NonNull Scheduler observeOn) {
         Subscriber<T> subscriber;
         if (observer instanceof LoadSubscriber) {
             subscriber = (LoadSubscriber<T>) observer;
@@ -91,28 +104,36 @@ public class HttpRequest {
         } else {
             subscriber = HttpUtils.convertToSubscriber(observer);
         }
-        return subscribe(iContext, observable, subscriber);
-    }
-
-    public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Observer<T> subscriber) {
-        return request(null, observable, subscriber);
-    }
-
-    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
-        Subscriber<T> subscriber;
-        if (iContext != null) {
-            subscriber = new LoadSubscriber<>(iContext, onNext);
-        } else {
-            subscriber = HttpUtils.convertToSubscriber(onNext);
-        }
-        return subscribe(iContext, observable, subscriber);
+        return subscribe(iContext, observable, subscriber, observeOn);
     }
 
     public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
         return request(null, observable, onNext);
     }
 
+    public <T> Subscriber<T> request(@NonNull Observable<T> observable, @Nullable Action1<T> onNext, @NonNull Scheduler observeOn) {
+        return request(null, observable, onNext, observeOn);
+    }
+
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> onNext) {
+        return request(iContext, observable, onNext, AndroidSchedulers.mainThread());
+    }
+
+    public <T> Subscriber<T> request(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, @Nullable Action1<T> onNext, @NonNull Scheduler observeOn) {
+        Subscriber<T> subscriber;
+        if (iContext != null) {
+            subscriber = new LoadSubscriber<>(iContext, onNext);
+        } else {
+            subscriber = HttpUtils.convertToSubscriber(onNext);
+        }
+        return subscribe(iContext, observable, subscriber, observeOn);
+    }
+
     private <T> Subscriber<T> subscribe(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, Subscriber<T> subscriber) {
+        return subscribe(iContext, observable, subscriber, AndroidSchedulers.mainThread());
+    }
+
+    private <T> Subscriber<T> subscribe(@Nullable RetrofitContext iContext, @NonNull Observable<T> observable, Subscriber<T> subscriber, @NonNull Scheduler observeOn) {
         if (iContext instanceof LifecycleImpl) {
             observable = observable.compose(((LifecycleImpl) iContext).bindToLifecycle());
         }
@@ -122,7 +143,7 @@ public class HttpRequest {
         }
         observable.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeOn)
                 .subscribe(subscriber);
         return subscriber;
     }
