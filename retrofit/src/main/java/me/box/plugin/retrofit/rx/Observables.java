@@ -32,7 +32,6 @@ public class Observables {
     public static <T> Observable<T> create(@NonNull Callable<T> callable) {
         return Observable.unsafeCreate(subscriber -> {
             try {
-                subscriber.onStart();
                 subscriber.onNext(callable.call());
                 subscriber.onCompleted();
             } catch (Throwable throwable) {
