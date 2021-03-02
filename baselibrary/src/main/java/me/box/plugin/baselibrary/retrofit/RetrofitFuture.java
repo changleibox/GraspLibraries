@@ -16,6 +16,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import me.box.plugin.retrofit.HttpException;
 import me.box.plugin.retrofit.impl.RetrofitContext;
 import rx.Observable;
 import rx.Observer;
@@ -66,19 +67,37 @@ public class RetrofitFuture<T> implements Callable<T>, Observer<T> {
     public T call() throws Exception {
         mWrapper.request(context, observable, this, Schedulers.io());
         mLatch.await();
-        if (exception != null) {
-            throw new Exception(exception);
+        if (exception instanceof Exception) {
+            throw ((Exception) exception);
         }
         return object;
     }
 
-    public T execute() throws ExecutionException, InterruptedException {
-        mTask.run();
-        return mTask.get();
+    public T execute() throws InterruptedException, ExecutionException, HttpException {
+        try {
+            mTask.run();
+            return mTask.get();
+        } catch (ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof HttpException) {
+                throw ((HttpException) cause);
+            } else {
+                throw e;
+            }
+        }
     }
 
-    public T execute(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        mTask.run();
-        return mTask.get(timeout, unit);
+    public T execute(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException, HttpException {
+        try {
+            mTask.run();
+            return mTask.get(timeout, unit);
+        } catch (ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof HttpException) {
+                throw ((HttpException) cause);
+            } else {
+                throw e;
+            }
+        }
     }
 }
