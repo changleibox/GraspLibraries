@@ -6,6 +6,10 @@ package me.box.plugin.retrofit;
 
 import androidx.annotation.Nullable;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import me.box.plugin.retrofit.impl.OnObserverErrorListener;
 import rx.Observer;
 import rx.Subscriber;
@@ -22,7 +26,7 @@ public class SubscriberWrapper<T> extends Subscriber<T> {
     private final boolean isShowPrompt;
 
     @Nullable
-    private static OnObserverErrorListener sObserverErrorListener;
+    private static final Set<OnObserverErrorListener> LISTENERS = Collections.synchronizedSet(new LinkedHashSet<>());
 
     public SubscriberWrapper(@Nullable Observer<T> observer) {
         this(observer, true);
@@ -64,7 +68,7 @@ public class SubscriberWrapper<T> extends Subscriber<T> {
     public void onError(Throwable e) {
         e.printStackTrace();
         if (isShowPrompt) {
-            showErrorMsg(e);
+            handleError(e);
         }
         if (mObserver != null) {
             mObserver.onError(e);
@@ -78,13 +82,20 @@ public class SubscriberWrapper<T> extends Subscriber<T> {
         }
     }
 
-    public static void setObserverErrorListener(OnObserverErrorListener listener) {
-        SubscriberWrapper.sObserverErrorListener = listener;
+    public static void addObserverErrorListener(OnObserverErrorListener listener) {
+        LISTENERS.add(listener);
     }
 
-    private static void showErrorMsg(Throwable e) {
-        if (sObserverErrorListener != null) {
-            sObserverErrorListener.onError(e);
+    public static void removeObserverErrorListener(OnObserverErrorListener listener) {
+        LISTENERS.remove(listener);
+    }
+
+    private static void handleError(Throwable e) {
+        for (OnObserverErrorListener listener : LISTENERS) {
+            if (listener == null) {
+                continue;
+            }
+            listener.onError(e);
         }
     }
 }
