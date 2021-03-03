@@ -6,6 +6,8 @@ package me.box.plugin.retrofit;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 /**
  * Created by Box on 17/3/15.
  * <p/>
@@ -16,19 +18,31 @@ public class HttpException extends IOException {
     private static final long serialVersionUID = 8645845574230995197L;
 
     private final int code;
+    @Nullable
+    private final Object value;
 
-    public HttpException(String msg, int code) {
+    public HttpException(String msg, int code, @Nullable Object value) {
         super(msg);
         this.code = code;
+        this.value = value;
     }
 
-    public HttpException(String msg, int code, Throwable cause) {
+    public HttpException(String msg, Throwable cause, int code, @Nullable Object value) {
         super(msg, cause);
         this.code = code;
+        this.value = value;
     }
 
     public int getCode() {
         return code;
+    }
+
+    /**
+     * @return 请求到的实体，可能为空
+     */
+    @Nullable
+    public Object getValue() {
+        return value;
     }
 
     @Override

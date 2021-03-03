@@ -4,11 +4,8 @@
 
 package me.box.plugin.retrofit;
 
-import android.text.TextUtils;
-
 import com.google.gson.TypeAdapter;
-
-import org.json.JSONObject;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,56 +14,40 @@ import okhttp3.ResponseBody;
 import retrofit2.Converter;
 
 final class GsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
-
     private final Type type;
     private final TypeAdapter<T> adapter;
-    private final String code;
-    private final String message;
-    private final String data;
+    private final String codeName;
+    private final String messageName;
+    private final String dataName;
     private final int validCode;
 
-    GsonResponseBodyConverter(Type type, TypeAdapter<T> adapter, String code, String message, String data, int validCode) {
+    GsonResponseBodyConverter(Type type, TypeAdapter<T> adapter, String codeName, String messageName, String dataName, int validCode) {
         this.type = type;
         this.adapter = adapter;
-        this.code = code;
-        this.message = message;
-        this.data = data;
+        this.codeName = codeName;
+        this.messageName = messageName;
+        this.dataName = dataName;
         this.validCode = validCode;
     }
 
     @Override
     public T convert(ResponseBody value) throws IOException {
-        final String json = value.string();
         try {
-            final JSONObject object = new JSONObject(json);
-            final int code = object.getInt(this.code);
-            final String message = object.getString(this.message);
+            final String json = value.string();
+            final Object data = JsonCompat.get(json, this.dataName);
+            final int code = JsonCompat.getInt(json, this.codeName);
+            final String message = JsonCompat.getString(json, this.messageName);
             if (code != validCode) {
-                throw new HttpException(message, code);
+                throw new HttpException(message, code, data);
             }
-        } catch (Exception e) {
-            IOException exception;
-            if (e instanceof IOException) {
-                exception = (IOException) e;
-            } else {
-                exception = new IOException(e.getMessage());
+            if (TypeCompat.isVoid(type) || data == null) {
+                return null;
             }
-            throw exception;
-        }
-        if (TypeCompat.isVoid(type)) {
-            return null;
-        }
-        final Type tmpType = TypeCompat.getResponseType(type);
-        if (tmpType != null) {
+            final Type dataType = TypeToken.get(data.getClass()).getType();
             //noinspection unchecked
-            return (T) JsonCompat.get(json, data);
-        }
-        final String data = JsonCompat.getString(json, this.data);
-        if (TextUtils.isEmpty(data)) {
-            return null;
-        } else {
-            assert data != null;
-            return adapter.fromJson(data);
+            return dataType == this.type ? (T) data : adapter.fromJson(data.toString());
+        } finally {
+            value.close();
         }
     }
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2021 CHANGLEI. All rights reserved.
  */
 
-package me.box.plugin.retrofit;
+package me.box.plugin.baselibrary.retrofit;
 
 import androidx.annotation.Nullable;
 
@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import me.box.plugin.retrofit.impl.OnObserverErrorListener;
+import me.box.plugin.baselibrary.impl.OnObserverErrorListener;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
@@ -23,18 +23,19 @@ import rx.Subscription;
 public class SubscriberWrapper<T> extends Subscriber<T> {
     @Nullable
     private final Observer<T> mObserver;
-    private final boolean isShowPrompt;
+    @Nullable
+    private final Object mTag;
 
     @Nullable
     private static final Set<OnObserverErrorListener> LISTENERS = Collections.synchronizedSet(new LinkedHashSet<>());
 
     public SubscriberWrapper(@Nullable Observer<T> observer) {
-        this(observer, true);
+        this(observer, null);
     }
 
-    public SubscriberWrapper(@Nullable Observer<T> observer, boolean isShowPrompt) {
+    public SubscriberWrapper(@Nullable Observer<T> observer, @Nullable Object tag) {
         this.mObserver = observer;
-        this.isShowPrompt = isShowPrompt;
+        this.mTag = tag;
         if (observer instanceof Subscriber) {
             ((Subscriber<T>) observer).add(new Subscription() {
                 @Override
@@ -67,9 +68,7 @@ public class SubscriberWrapper<T> extends Subscriber<T> {
     @Override
     public void onError(Throwable e) {
         e.printStackTrace();
-        if (isShowPrompt) {
-            handleError(e);
-        }
+        handleError(mTag, e);
         if (mObserver != null) {
             mObserver.onError(e);
         }
@@ -90,12 +89,12 @@ public class SubscriberWrapper<T> extends Subscriber<T> {
         LISTENERS.remove(listener);
     }
 
-    private static void handleError(Throwable e) {
+    private static void handleError(@Nullable Object tag, Throwable e) {
         for (OnObserverErrorListener listener : LISTENERS) {
             if (listener == null) {
                 continue;
             }
-            listener.onError(e);
+            listener.onError(tag, e);
         }
     }
 }
